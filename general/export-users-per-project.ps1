@@ -46,7 +46,7 @@ function Get-GroupMembers($groupName)
     $groupMembers = $null
     try {
         $groupName = [System.Web.HttpUtility]::UrlEncode($groupName)
-        $groupMembers = Get-JsonOutput -path "group/member?groupname=$groupName"
+        $groupMembers = (Get-JsonOutput -path "group/member?groupname=$groupName").values
     }
     catch {
         $errormessage = ($_.ErrorDetails.Message | ConvertFrom-Json).errorMessages[0]
@@ -55,7 +55,7 @@ function Get-GroupMembers($groupName)
     return $groupMembers
 }
 
-$projects = Get-Projects | Where-Object { $_.name -notlike "Projekt ist  geschlossen !!!*" }
+$projects = Get-Projects
 $entries = New-Object System.Collections.ArrayList
 foreach ($project in $projects) {
     Write-Host "Processing project '$($project.name)'"
@@ -86,8 +86,8 @@ foreach ($project in $projects) {
             else 
             {
                 $entry = New-Object Entry
-                $entry.Username = $groupmember.name
-                $entry.UserDisplayName = $groupmember.displayName
+                $entry.Username = $member.name
+                $entry.UserDisplayName = $member.displayName
                 $entry.ProjectKey = $project.key
                 $entry.ProjectName = $project.name
                 $entry.Role = $role.name
